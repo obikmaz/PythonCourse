@@ -1,0 +1,44 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pylab as plt
+import warnings
+import itertools
+warnings.filterwarnings("ignore")
+plt.style.use('fivethirtyeight')
+import statsmodels.api as sm
+import matplotlib
+
+matplotlib.rcParams['axes.labelsize'] = 14
+matplotlib.rcParams['xtick.labelsize'] = 12
+matplotlib.rcParams['ytick.labelsize'] = 12
+matplotlib.rcParams['text.color'] = 'k'
+
+df = pd.read_excel("UzumSatisVeriSeti.xlsx")
+KASTAMONU = df.loc[df['Şehir'] == 'KASTAMONU']
+KASTAMONU['Tarih'].min(), KASTAMONU['Tarih'].max()
+
+
+cols = ['Ortalama Satış Tutarı (TL)', 'Yeşil Üzüm Miktar (Kg)', 'Kırmızı Üzüm Miktar (Kg)', 'Mor Üzüm Miktar (Kg)', 'Toplam Kasa (Adet)', 'Büyük Boy Kasa (Adet)', 'XL Kasa (Adet)', 'Üretim Tipi', 'Şehir']
+KASTAMONU.drop(cols, axis=1, inplace=True)
+KASTAMONU = KASTAMONU.sort_values('Tarih')
+KASTAMONU.isnull().sum()
+
+KASTAMONU = KASTAMONU.groupby('Tarih')['Toplam  Miktar (Kg)'].sum().reset_index()
+
+KASTAMONU = KASTAMONU.set_index('Tarih')
+KASTAMONU.index
+
+print(KASTAMONU)
+
+y = KASTAMONU['Toplam  Miktar (Kg)'].resample('MS').mean()
+y['2017':]
+
+
+y.plot(figsize=(15, 6))
+plt.show()
+
+from pylab import rcParams
+rcParams['figure.figsize'] = 18, 8
+decomposition = sm.tsa.seasonal_decompose(y, model='additive')
+fig = decomposition.plot()
+plt.show()
